@@ -1,13 +1,14 @@
+
 'use client';
 
 import Link from 'next/link';
 import { Menu, Package2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
-import { Button } from '../ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
-import { cn } from '../../lib/utils';
-import { useIsMobile } from '../../hooks/use-mobile';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const navLinks = [
   { href: '/', label: 'Home' },
