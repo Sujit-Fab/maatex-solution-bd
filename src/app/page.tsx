@@ -5,19 +5,19 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { getBanners, getFabrics, getHomeCategories } from '../lib/data-client';
-import { FabricCard } from '../components/fabric-card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getBanners, getFabrics, getHomeCategories } from '@/lib/data-client';
+import { FabricCard } from '@/components/fabric-card';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '../components/ui/carousel';
-import { Skeleton } from '../components/ui/skeleton';
-import { Banner, Fabric, HomeCategory } from '../lib/types';
+} from '@/components/ui/carousel';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Banner, Fabric, HomeCategory } from '@/lib/types';
 
 
 export default function Home() {
@@ -29,15 +29,20 @@ export default function Home() {
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
-      const [fabricsData, bannersData, categoriesData] = await Promise.all([
-        getFabrics({ featured: true }),
-        getBanners(),
-        getHomeCategories(),
-      ]);
-      setFeaturedFabrics(fabricsData);
-      setBanners(bannersData);
-      setHomeCategories(categoriesData);
-      setIsLoading(false);
+      try {
+        const [fabricsData, bannersData, categoriesData] = await Promise.all([
+          getFabrics({ featured: true }),
+          getBanners(),
+          getHomeCategories(),
+        ]);
+        setFeaturedFabrics(fabricsData);
+        setBanners(bannersData);
+        setHomeCategories(categoriesData);
+      } catch (error) {
+        console.error("Failed to fetch home page data", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
     fetchData();
   }, []);
@@ -48,12 +53,22 @@ export default function Home() {
       <Skeleton className="h-full w-full" />
       <div className="absolute inset-0 bg-primary/60 z-10" />
       <div className="relative z-20 flex h-full flex-col items-center justify-center text-center text-primary-foreground px-4">
-        <Skeleton className="h-12 w-3/4" />
-        <Skeleton className="h-6 w-1/2 mt-4" />
+        <Skeleton className="h-12 w-3/4 max-w-lg" />
+        <Skeleton className="h-6 w-1/2 max-w-md mt-4" />
         <Skeleton className="h-12 w-48 mt-8" />
       </div>
     </div>
   );
+  
+  const renderCardSkeleton = () => (
+     <div className="flex flex-col space-y-3">
+        <Skeleton className="h-[225px] w-full rounded-xl" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-[250px]" />
+          <Skeleton className="h-4 w-[200px]" />
+        </div>
+      </div>
+  )
 
   return (
     <div className="flex-1">
@@ -69,13 +84,14 @@ export default function Home() {
             }}
           >
             <CarouselContent>
-              {banners.map((banner, index) => (
+              {(banners && banners.length > 0) ? banners.map((banner) => (
                 <CarouselItem key={banner.id}>
                   <div className="relative h-[60vh] min-h-[400px] w-full">
                     <Image
                       src={banner.imageUrl}
                       alt={banner.alt || banner.title}
                       fill
+                      priority
                       className="object-cover z-0"
                       data-ai-hint={banner.imageHint}
                     />
@@ -99,10 +115,12 @@ export default function Home() {
                     </div>
                   </div>
                 </CarouselItem>
-              ))}
+              )) : <CarouselItem>{renderHeroSkeleton()}</CarouselItem>}
             </CarouselContent>
-            <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-20 hidden md:flex" />
-            <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-20 hidden md:flex" />
+            {banners && banners.length > 1 && <>
+              <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-20 hidden md:flex" />
+              <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-20 hidden md:flex" />
+            </>}
           </Carousel>
         )}
       </section>
@@ -115,9 +133,17 @@ export default function Home() {
             Handpicked selections from our premium collection.
           </p>
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredFabrics.slice(0, 3).map((fabric) => (
-              <FabricCard key={fabric.id} fabric={fabric} />
-            ))}
+            {isLoading ? (
+              <>
+                {renderCardSkeleton()}
+                {renderCardSkeleton()}
+                {renderCardSkeleton()}
+              </>
+            ) : (
+              featuredFabrics.slice(0, 3).map((fabric) => (
+                <FabricCard key={fabric.id} fabric={fabric} />
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -130,7 +156,11 @@ export default function Home() {
             Find the perfect material for your next project.
           </p>
           <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-4">
-            {homeCategories
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i}><Skeleton className="aspect-square w-full" /></div>
+              ))
+            ) : homeCategories
               .filter((category) => category.imageUrl)
               .map((category) => (
                 <Link

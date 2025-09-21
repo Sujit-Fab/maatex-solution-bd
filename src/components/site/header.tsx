@@ -1,9 +1,9 @@
-
 'use client';
 
 import Link from 'next/link';
 import { Menu, Package2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -22,6 +22,8 @@ const navLinks = [
 export function SiteHeader() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+
 
   const renderNavLinks = (className?: string) => (
     <nav className={cn('flex items-center space-x-4 lg:space-x-6', className)}>
@@ -29,6 +31,7 @@ export function SiteHeader() {
         <Link
           key={href}
           href={href}
+          onClick={() => setIsSheetOpen(false)}
           className={cn(
             'text-sm font-medium transition-colors hover:text-primary',
             pathname === href ? 'text-primary' : 'text-muted-foreground'
@@ -42,8 +45,15 @@ export function SiteHeader() {
 
   if (isMobile) {
     return (
-      <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <Sheet>
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-4 border-b bg-background px-4 md:px-6">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-lg font-semibold md:text-base"
+        >
+          <Package2 className="h-6 w-6 text-primary" />
+          <span className="font-bold">Maatex Solution BD</span>
+        </Link>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="shrink-0">
               <Menu className="h-5 w-5" />
@@ -53,6 +63,7 @@ export function SiteHeader() {
           <SheetContent side="left">
             <Link
               href="/"
+              onClick={() => setIsSheetOpen(false)}
               className="mb-6 flex items-center gap-2 text-lg font-semibold"
             >
               <Package2 className="h-6 w-6 text-primary" />
@@ -61,13 +72,6 @@ export function SiteHeader() {
             {renderNavLinks('flex-col space-x-0 space-y-4 items-start')}
           </SheetContent>
         </Sheet>
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-lg font-semibold md:text-base"
-        >
-          <Package2 className="h-6 w-6 text-primary" />
-          <span className="sr-only">Maatex Solution BD</span>
-        </Link>
       </header>
     );
   }
