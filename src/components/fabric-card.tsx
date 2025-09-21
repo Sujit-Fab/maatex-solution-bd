@@ -1,10 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import type { Fabric } from '../lib/types';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import type { Fabric } from '@/lib/types';
 import { ArrowRight } from 'lucide-react';
-import { Skeleton } from './ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface FabricCardProps {
   fabric: Fabric;
